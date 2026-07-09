@@ -14,7 +14,8 @@ import (
 )
 
 type ProbeInput struct {
-	Tags  []string `json:"tags" jsonschema:"tags to target hosts by; AND semantics — a host matches only if it carries ALL listed tags (like GitLab runner tags); must be non-empty"`
+	Host  string   `json:"host,omitempty" jsonschema:"target a SINGLE inventory host by name or address; use this to check one host. Mutually exclusive with tags"`
+	Tags  []string `json:"tags,omitempty" jsonschema:"target MULTIPLE hosts by tags; AND semantics — a host matches only if it carries ALL listed tags (like GitLab runner tags). Use host for a single machine instead"`
 	Check string   `json:"check" jsonschema:"name of a curated read-only diagnostic to run"`
 }
 
@@ -43,9 +44,11 @@ func (p *Probe) Register(s *mcp.Server) {
 }
 
 func (p *Probe) description() string {
-	return "Run one curated read-only diagnostic on all inventory hosts carrying the given tags " +
-		"(AND semantics, like GitLab runner tags). Read-only: you pick a check by name, you cannot pass " +
-		"an arbitrary command. Available checks: " + strings.Join(checks.Names(), ", ") + "."
+	return "Run one curated read-only diagnostic on inventory host(s). Target EITHER a single host " +
+		"(host = inventory name or address) OR a group (tags, AND semantics like GitLab runner tags). " +
+		"This is the preferred way to check how a host is doing (uptime, disk, memory, failed services, " +
+		"logs) — read-only, you pick a check by name, no arbitrary command. Available checks: " +
+		strings.Join(checks.Names(), ", ") + "."
 }
 
 func (p *Probe) handle(ctx context.Context, _ *mcp.CallToolRequest, in ProbeInput) (*mcp.CallToolResult, ProbeOutput, error) {
@@ -61,8 +64,21 @@ func (p *Probe) Execute(ctx context.Context, in ProbeInput) (ProbeOutput, error)
 	if err != nil {
 		return ProbeOutput{}, err
 	}
+
+	host := strings.TrimSpace(in.Host)
+	if host != "" {
+		// Single-host mode: resolve one inventory host (fail-closed).
+		h, ok := p.inv.Resolve(host)
+		if !ok {
+			return ProbeOutput{}, fmt.Errorf("host %q not in inventory (fail-closed): refusing to connect", in.Host)
+		}
+		res := toHostResult(h, p.ssh.Run(ctx, sshx.Target{Addr: h.Addr, User: h.User, Port: h.Port}, chk.Script))
+		p.log.Info("ssh_probe completed", zap.String("check", chk.Name), zap.String("host", h.Name))
+		return ProbeOutput{Check: chk.Name, MatchedHosts: 1, Results: []HostResult{res}}, nil
+	}
+
 	if !hasNonEmpty(in.Tags) {
-		return ProbeOutput{}, fmt.Errorf("tags must be non-empty: specify which hosts to probe")
+		return ProbeOutput{}, fmt.Errorf("specify a target: either host (one machine by name/address) or tags (a group)")
 	}
 
 	hosts := p.inv.Match(in.Tags)

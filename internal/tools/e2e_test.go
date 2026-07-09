@@ -90,6 +90,27 @@ hosts:
 		t.Fatal("empty tags must be rejected")
 	}
 
+	// probe одного хоста по имени → одна секция, ok.
+	single, err := probe.Execute(ctx, ProbeInput{Host: "vm-a", Check: "uptime"})
+	if err != nil {
+		t.Fatalf("probe host: %v", err)
+	}
+	if single.MatchedHosts != 1 || len(single.Results) != 1 || single.Results[0].Host != "vm-a" || single.Results[0].Status != string(sshx.StatusOK) {
+		t.Fatalf("single-host probe bad result: %+v", single)
+	}
+	// probe одного хоста по адресу тоже резолвится.
+	if byAddr, err := probe.Execute(ctx, ProbeInput{Host: "127.0.0.1", Check: "uptime"}); err != nil || byAddr.MatchedHosts != 1 {
+		t.Fatalf("probe by addr: err=%v matched=%d", err, byAddr.MatchedHosts)
+	}
+	// probe хоста вне инвентаря → отказ (fail-closed).
+	if _, err := probe.Execute(ctx, ProbeInput{Host: "10.9.9.9", Check: "uptime"}); err == nil {
+		t.Fatal("probe host outside inventory must fail-closed")
+	}
+	// ни host, ни tags → ошибка.
+	if _, err := probe.Execute(ctx, ProbeInput{Check: "uptime"}); err == nil {
+		t.Fatal("probe without host or tags must be rejected")
+	}
+
 	// exec произвольной команды на инвентарном хосте.
 	er, err := execTool.Execute(ctx, ExecInput{Host: "vm-a", Command: "echo hello-fleet"})
 	if err != nil {
