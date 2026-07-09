@@ -1,0 +1,23 @@
+# Пример инвентаря флота (монтируется как configmap в /etc/ssh-fleet/inventory.yaml).
+# Единственный источник достижимых хостов — аллоулист (fail-closed): хоста нет здесь →
+# соединение не устанавливается. Моделью НЕ пишется, в аргументах инструментов не приходит.
+#
+# name  — уникальный id хоста (для ssh_exec и секций ответа)
+# addr  — IP или DNS (непусто)
+# user  — SSH-пользователь (непусто)
+# port  — дефолт 22
+# tags  — метки адресации (как теги GitLab-раннеров); ssh_probe матчит по AND
+hosts:
+  - name: stand-a-1
+    addr: 10.0.0.11
+    user: root
+    tags: [stand-a, test]
+  - name: stand-a-2
+    addr: 10.0.0.12
+    user: ubuntu
+    port: 2222
+    tags: [stand-a, test]
+  - name: stand-b-1
+    addr: 10.0.0.21
+    user: admin
+    tags: [stand-b]

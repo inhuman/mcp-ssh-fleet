@@ -1,0 +1,15 @@
+.git/
+.github/
+.idea/
+.vscode/
+.claude/
+.specify/
+specs/
+*.md
+!README.md
+/mcp-ssh-fleet
+*.test
+*.out
+coverage.*
+.env*
+deploy/
