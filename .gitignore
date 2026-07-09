@@ -1,0 +1,48 @@
+# IDE
+.idea/
+.vscode/
+
+# env / secrets
+.env
+.env.local
+*.env
+
+# бинарники (анкер к корню: иначе матчит и каталог cmd/mcp-ssh-fleet/)
+/mcp-ssh-fleet
+*.exe
+*.so
+
+# ad-hoc shell в корне (нормальные скрипты — под scripts/)
+/*.sh
+
+# тестовые артефакты
+*.out
+coverage.*
+*.test
+
+# vendor коммитим целиком
+!vendor/**
+
+# локальные ключи/инвентарь для ручной проверки — НИКОГДА в репу
+id_ed25519
+id_ed25519.pub
+*.pem
+inventory.local.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AI tool configs
+.claude
+.specify
+specs
+.cursor
+.cursorrules
+.windsurf
+.aider*
+.gemini
+CLAUDE.md
+AGENTS.md
+GEMINI.md
+PLAN.md
