@@ -9,7 +9,7 @@ import (
 // Config — окружение сервера mcp-ssh-fleet. Все ключи в substruct с префиксом
 // SSH_FLEET_. Инвентарь и ключ — пути к смонтированным configmap/секрету.
 type Config struct {
-	Transport string `env:"SSH_FLEET_TRANSPORT" env-default:"sse"`
+	Transport string `env:"SSH_FLEET_TRANSPORT" env-default:"http"`
 	Addr      string `env:"SSH_FLEET_ADDR" env-default:":8080"`
 	AuthToken string `env:"SSH_FLEET_AUTH_TOKEN" mask:"filled"`
 

@@ -20,8 +20,8 @@ MCP-сервер: даёт агенту два инструмента повер
 
 | Переменная | Дефолт | Смысл |
 |---|---|---|
-| `SSH_FLEET_TRANSPORT` | `sse` | `sse` \| `http` \| `stdio` |
-| `SSH_FLEET_ADDR` | `:8080` | адрес для sse/http |
+| `SSH_FLEET_TRANSPORT` | `http` | `http` (StreamableHTTP, endpoint `/mcp`) \| `sse` \| `stdio` |
+| `SSH_FLEET_ADDR` | `:8080` | адрес для http/sse |
 | `SSH_FLEET_AUTH_TOKEN` | — | опц. токен `X-MCP-AUTH` |
 | `SSH_FLEET_INVENTORY_PATH` | `/etc/ssh-fleet/inventory.yaml` | путь к инвентарю (configmap) |
 | `SSH_FLEET_KEY_PATH` | `/etc/ssh-fleet/id_ed25519` | путь к приватному ключу (секрет) |
@@ -46,8 +46,9 @@ make docker
 
 ## Подключение к MCP-клиенту
 
-Сервер регистрируется как обычный SSE MCP-сервер (URL вида
-`http://<host>:8080/sse`). Оба инструмента становятся доступны клиенту.
+По умолчанию сервер говорит на StreamableHTTP; регистрируется как обычный HTTP
+MCP-сервер с endpoint `/mcp` (URL вида `http://<host>:8080/mcp`). Оба инструмента
+становятся доступны клиенту.
 
 Рекомендации по безопасности на стороне клиента:
 
