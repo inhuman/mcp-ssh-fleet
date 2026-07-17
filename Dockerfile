@@ -16,6 +16,10 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -mod=vendor -tr
 # Runtime stage — distroless static, non-root. SSH-клиент — чистый Go (x/crypto/ssh),
 # внешний ssh-бинарь не нужен, поэтому shell/пакеты в образе отсутствуют.
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
+# Ownership proof for the MCP Registry: the label value MUST equal the `name`
+# field in server.json. https://registry.modelcontextprotocol.io
+LABEL io.modelcontextprotocol.server.name="io.github.inhuman/mcp-ssh-fleet" \
+      org.opencontainers.image.source="https://github.com/inhuman/mcp-ssh-fleet"
 COPY --from=build /out/mcp-ssh-fleet /usr/local/bin/mcp-ssh-fleet
 USER nonroot:nonroot
 ENTRYPOINT ["/usr/local/bin/mcp-ssh-fleet"]

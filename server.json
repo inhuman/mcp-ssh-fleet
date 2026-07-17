@@ -1,0 +1,85 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.inhuman/mcp-ssh-fleet",
+  "title": "SSH Fleet",
+  "description": "Two curated tools over SSH to a fleet of non-Kubernetes hosts: read-only ssh_probe (uptime/disk/mem/failed/logs across tag-selected hosts) and single-command ssh_exec on one inventory host. The inventory is a fail-closed allowlist and the private key stays a mounted secret, never in model context.",
+  "version": "0.1.2",
+  "repository": {
+    "url": "https://github.com/inhuman/mcp-ssh-fleet",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "oci",
+      "identifier": "ghcr.io/inhuman/mcp-ssh-fleet:0.1.2",
+      "transport": {
+        "type": "stdio"
+      },
+      "runtimeHint": "docker",
+      "runtimeArguments": [
+        {
+          "type": "named",
+          "name": "-v",
+          "description": "Mount the host inventory allowlist (YAML), read-only.",
+          "value": "{inventory_path}:/etc/ssh-fleet/inventory.yaml:ro",
+          "isRequired": true,
+          "variables": {
+            "inventory_path": {
+              "description": "Absolute path to your inventory.yaml on the host (see deploy/inventory.example.yaml).",
+              "isRequired": true,
+              "format": "filepath"
+            }
+          }
+        },
+        {
+          "type": "named",
+          "name": "-v",
+          "description": "Mount the private SSH key, read-only.",
+          "value": "{key_path}:/etc/ssh-fleet/id_ed25519:ro",
+          "isRequired": true,
+          "variables": {
+            "key_path": {
+              "description": "Absolute path to the private SSH key on the host.",
+              "isRequired": true,
+              "isSecret": true,
+              "format": "filepath"
+            }
+          }
+        }
+      ],
+      "environmentVariables": [
+        {
+          "name": "SSH_FLEET_TRANSPORT",
+          "description": "MCP transport. Must be 'stdio' for direct docker/stdio use.",
+          "default": "stdio"
+        },
+        {
+          "name": "SSH_FLEET_CMD_TIMEOUT_SECONDS",
+          "description": "Per-host command timeout in seconds (1..600).",
+          "default": "20"
+        },
+        {
+          "name": "SSH_FLEET_OUTPUT_CAP_BYTES",
+          "description": "Cap on output bytes per host section (>=256).",
+          "default": "8192"
+        },
+        {
+          "name": "SSH_FLEET_PROBE_CONCURRENCY",
+          "description": "Parallelism for ssh_probe.",
+          "default": "8"
+        },
+        {
+          "name": "SSH_FLEET_PROBE_MAX_HOSTS",
+          "description": "Safety cap on the number of hosts in one probe.",
+          "default": "50"
+        },
+        {
+          "name": "SSH_FLEET_AUTH_TOKEN",
+          "description": "Optional X-MCP-AUTH bearer token (only used by the http/sse transports).",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}
