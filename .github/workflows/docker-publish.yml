@@ -7,6 +7,7 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write # OIDC auth to the MCP Registry (no secrets needed)
 
 jobs:
   push:
@@ -43,6 +44,26 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository_owner }}/mcp-ssh-fleet:latest
             ghcr.io/${{ github.repository_owner }}/mcp-ssh-fleet:${{ steps.v.outputs.version }}
+
+      # --- Publish to the MCP Registry (registry.modelcontextprotocol.io) ---
+      # Runs after the image is pushed, so the registry's OCI ownership check
+      # (the io.modelcontextprotocol.server.name label) can pull it anonymously.
+      - name: Pin server.json to this release
+        run: |
+          jq --arg v "${{ steps.v.outputs.version }}" \
+             --arg img "ghcr.io/${{ github.repository_owner }}/mcp-ssh-fleet:${{ steps.v.outputs.version }}" \
+             '.version = $v | .packages[0].identifier = $img' server.json > server.tmp
+          mv server.tmp server.json
+
+      - name: Install mcp-publisher
+        run: |
+          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+
+      - name: Authenticate to MCP Registry (OIDC)
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish to MCP Registry
+        run: ./mcp-publisher publish
 
       # Supply-chain: SBOM + signing. Enable when cosign keys / OIDC and an SBOM
       # store are set up.
