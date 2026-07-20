@@ -13,7 +13,7 @@ import (
 
 const authHeader = "X-MCP-AUTH"
 
-// Serve запускает сервер на выбранном транспорте. Набор тулов одинаков на всех.
+// Serve starts the server on the configured transport. The tool set is identical on all of them.
 func Serve(ctx context.Context, cfg config.Config, srv *mcp.Server, log *zap.Logger) error {
 	switch cfg.Transport {
 	case "stdio":

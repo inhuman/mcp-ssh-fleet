@@ -1,7 +1,7 @@
-// Package sshx — SSH-клиент: одно соединение → одна неинтерактивная команда →
-// закрытие. Приватный ключ читается из секрета пода и никогда не сериализуется в
-// вывод/лог. Проверка ключа хоста — TOFU (доверие при первом контакте + фиксация
-// отпечатка); несовпадение на последующем контакте отклоняет соединение.
+// Package sshx is the SSH client: one connection, one non-interactive command, then close.
+// The private key is read from a pod secret and is never serialized into output or logs.
+// Host keys are verified TOFU-style (trust on first use, with the fingerprint recorded);
+// a mismatch on any later contact rejects the connection.
 package sshx
 
 import (
@@ -48,9 +48,9 @@ type Client struct {
 	known    *fingerprintStore
 }
 
-// New читает приватный ключ из keyPath (секрет пода) и строит клиента. Отсутствие/
-// битый ключ — ошибка старта (сервер не должен молча принимать вызовы, которые все
-// упадут).
+// New reads the private key from keyPath (a pod secret) and builds the client. A missing or
+// malformed key is a startup error — the server must not silently accept calls that are all
+// going to fail.
 func New(keyPath string, capBytes int, timeout time.Duration) (*Client, error) {
 	pem, err := os.ReadFile(keyPath)
 	if err != nil {
@@ -68,9 +68,9 @@ func New(keyPath string, capBytes int, timeout time.Duration) (*Client, error) {
 	}, nil
 }
 
-// Run подключается к цели и выполняет одну неинтерактивную команду. Операционные
-// сбои (недоступность/таймаут/несовпадение ключа) кодируются в Result.Status, а не
-// возвращаются ошибкой.
+// Run connects to the target and executes one non-interactive command. Operational failures
+// (unreachable, timeout, host-key mismatch) are encoded in Result.Status rather than returned
+// as an error.
 func (c *Client) Run(ctx context.Context, t Target, command string) Result {
 	ctx, cancel := context.WithTimeout(ctx, c.timeout)
 	defer cancel()
@@ -142,7 +142,7 @@ func (c *Client) runOne(ctx context.Context, client *ssh.Client, command string,
 		case r.err == nil:
 			res.Status = StatusOK
 		case isExitError(r.err):
-			// Команда отработала, но вернула ненулевой код — вывод валиден.
+			// The command ran but exited non-zero — the output is still valid.
 			res.Status = StatusOK
 		default:
 			res.Status = StatusError
@@ -184,10 +184,10 @@ func capOutput(b []byte, limit int) (string, bool) {
 	if len(b) <= limit {
 		return string(b), false
 	}
-	return string(b[:limit]) + fmt.Sprintf("\n…[обрезано %d байт]", len(b)-limit), true
+	return string(b[:limit]) + fmt.Sprintf("\n…[truncated %d bytes]", len(b)-limit), true
 }
 
-// fpHolder переносит отпечаток (и факт несовпадения) из host-key-колбэка наружу.
+// fpHolder carries the fingerprint (and any mismatch) out of the host-key callback.
 type fpHolder struct {
 	mu       sync.Mutex
 	fp       string
@@ -220,7 +220,7 @@ func (h *fpHolder) mismatchReason() (string, bool) {
 	return h.reason, h.mismatch
 }
 
-// fingerprintStore — TOFU-хранилище отпечатков (in-memory, per-process в MVP).
+// fingerprintStore is the TOFU fingerprint store (in-memory, per-process).
 type fingerprintStore struct {
 	mu sync.Mutex
 	m  map[string]string

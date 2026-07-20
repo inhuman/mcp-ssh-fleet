@@ -6,8 +6,8 @@ import (
 	"github.com/inhuman/config"
 )
 
-// Config — окружение сервера mcp-ssh-fleet. Все ключи в substruct с префиксом
-// SSH_FLEET_. Инвентарь и ключ — пути к смонтированным configmap/секрету.
+// Config is the mcp-ssh-fleet server environment. Every key lives in a substruct with the
+// SSH_FLEET_ prefix. Inventory and key are paths to a mounted configmap/secret.
 type Config struct {
 	Transport string `env:"SSH_FLEET_TRANSPORT" env-default:"http"`
 	Addr      string `env:"SSH_FLEET_ADDR" env-default:":8080"`

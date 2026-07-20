@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
-# Build stage — вендоренное дерево для воспроизводимой сборки.
-# Pin по multi-arch digest (обновлять осознанно):
+# Build stage — uses the committed vendor tree for reproducible builds.
+# Pinned by multi-arch manifest-list digest (update it intentionally):
 #   docker buildx imagetools inspect golang:1.26-bookworm
 FROM golang:1.26-bookworm@sha256:1ecb7edf62a0408027bd5729dfd6b1b8766e578e8df93995b225dfd0944eb651 AS build
 ARG VERSION=dev
@@ -13,8 +13,8 @@ RUN CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -mod=vendor -tr
     -ldflags "-s -w -X main.version=${VERSION}" \
     -o /out/mcp-ssh-fleet ./cmd/mcp-ssh-fleet
 
-# Runtime stage — distroless static, non-root. SSH-клиент — чистый Go (x/crypto/ssh),
-# внешний ssh-бинарь не нужен, поэтому shell/пакеты в образе отсутствуют.
+# Runtime stage — distroless static, non-root. The SSH client is pure Go (x/crypto/ssh),
+# so no external ssh binary is needed and the image ships no shell or package manager.
 FROM gcr.io/distroless/static-debian12:nonroot AS runtime
 # Ownership proof for the MCP Registry: the label value MUST equal the `name`
 # field in server.json. https://registry.modelcontextprotocol.io

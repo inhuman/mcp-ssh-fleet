@@ -1,12 +1,12 @@
-# Пример инвентаря флота (монтируется как configmap в /etc/ssh-fleet/inventory.yaml).
-# Единственный источник достижимых хостов — аллоулист (fail-closed): хоста нет здесь →
-# соединение не устанавливается. Моделью НЕ пишется, в аргументах инструментов не приходит.
+# Example fleet inventory (mounted as a configmap at /etc/ssh-fleet/inventory.yaml).
+# The only source of reachable hosts — an allowlist (fail-closed): a host absent from this
+# file is never connected to. The model never writes it and never passes it in arguments.
 #
-# name  — уникальный id хоста (для ssh_exec и секций ответа)
-# addr  — IP или DNS (непусто)
-# user  — SSH-пользователь (непусто)
-# port  — дефолт 22
-# tags  — метки адресации (как теги GitLab-раннеров); ssh_probe матчит по AND
+# name  — unique host id (used by ssh_exec and in response sections)
+# addr  — IP or DNS name (non-empty)
+# user  — SSH user (non-empty)
+# port  — defaults to 22
+# tags  — addressing labels (like GitLab runner tags); ssh_probe matches them with AND
 hosts:
   - name: stand-a-1
     addr: 10.0.0.11

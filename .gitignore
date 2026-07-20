@@ -7,23 +7,23 @@
 .env.local
 *.env
 
-# бинарники (анкер к корню: иначе матчит и каталог cmd/mcp-ssh-fleet/)
+# binaries (anchored to the root: otherwise it also matches cmd/mcp-ssh-fleet/)
 /mcp-ssh-fleet
 *.exe
 *.so
 
-# ad-hoc shell в корне (нормальные скрипты — под scripts/)
+# ad-hoc shell in the root (proper scripts live under scripts/)
 /*.sh
 
-# тестовые артефакты
+# test artifacts
 *.out
 coverage.*
 *.test
 
-# vendor коммитим целиком
+# vendor is committed in full
 !vendor/**
 
-# локальные ключи/инвентарь для ручной проверки — НИКОГДА в репу
+# local keys/inventory for manual testing — NEVER commit
 id_ed25519
 id_ed25519.pub
 *.pem

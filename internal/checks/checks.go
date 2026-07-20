@@ -1,6 +1,6 @@
-// Package checks — зашитый реестр курируемых read-only диагностик для ssh_probe.
-// Модель выбирает только имя проверки; тело скрипта задаётся здесь, не приходит из
-// аргументов (анти-инъекция, детерминизм).
+// Package checks is the built-in registry of curated read-only diagnostics for ssh_probe.
+// The model picks a check by name only; the script body is defined here and never comes
+// from the arguments (injection-proof and deterministic).
 package checks
 
 import (
@@ -15,13 +15,13 @@ type Check struct {
 	Description string
 }
 
-// registry — набор проверок MVP. Все скрипты неинтерактивны и read-only.
+// registry is the set of available checks. Every script is non-interactive and read-only.
 var registry = map[string]Check{
-	"uptime": {"uptime", "uptime", "аптайм и средняя нагрузка"},
-	"disk":   {"disk", "df -h", "свободное место на дисках"},
-	"mem":    {"mem", "free -m", "использование памяти"},
-	"failed": {"failed", "systemctl --failed --no-legend --no-pager 2>/dev/null || echo 'systemctl unavailable'", "упавшие systemd-сервисы"},
-	"logs":   {"logs", "journalctl -n 50 --no-pager 2>/dev/null || tail -n 50 /var/log/syslog 2>/dev/null || echo 'no system log'", "хвост системного журнала"},
+	"uptime": {"uptime", "uptime", "uptime and load average"},
+	"disk":   {"disk", "df -h", "free disk space"},
+	"mem":    {"mem", "free -m", "memory usage"},
+	"failed": {"failed", "systemctl --failed --no-legend --no-pager 2>/dev/null || echo 'systemctl unavailable'", "failed systemd services"},
+	"logs":   {"logs", "journalctl -n 50 --no-pager 2>/dev/null || tail -n 50 /var/log/syslog 2>/dev/null || echo 'no system log'", "tail of the system log"},
 }
 
 func Resolve(name string) (Check, error) {
@@ -32,7 +32,7 @@ func Resolve(name string) (Check, error) {
 	return c, nil
 }
 
-// Names возвращает отсортированный список имён проверок (для описания тула и ошибок).
+// Names returns the sorted list of check names (used in the tool description and errors).
 func Names() []string {
 	out := make([]string, 0, len(registry))
 	for n := range registry {

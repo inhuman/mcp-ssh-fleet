@@ -1,5 +1,5 @@
-// Package inventory — источник достижимых хостов (аллоулист). Читается на старте
-// из YAML configmap; моделью не пишется, в аргументах инструментов не приходит.
+// Package inventory is the source of reachable hosts (an allowlist). It is read at startup
+// from a YAML configmap; the model never writes it and it never arrives in tool arguments.
 package inventory
 
 import (
@@ -36,8 +36,8 @@ func Load(path string) (*Inventory, error) {
 	return Parse(raw)
 }
 
-// Parse валидирует инвентарь: дубль name / пустой addr|user / порт вне диапазона —
-// фатальная ошибка. Пустой список хостов допустим (сервер поднимается).
+// Parse validates the inventory: a duplicate name, an empty addr or user, or a port out of
+// range is fatal. An empty host list is allowed (the server still starts).
 func Parse(raw []byte) (*Inventory, error) {
 	var f file
 	if err := yaml.Unmarshal(raw, &f); err != nil {
@@ -84,7 +84,7 @@ func normalizeTags(tags []string) []string {
 	return out
 }
 
-// Match возвращает хосты, несущие ВСЕ запрошенные теги (AND-семантика).
+// Match returns the hosts carrying ALL of the requested tags (AND semantics).
 func (inv *Inventory) Match(tags []string) []Host {
 	want := normalizeTags(tags)
 	var out []Host
@@ -105,8 +105,8 @@ func hostHasAll(h Host, want []string) bool {
 	return true
 }
 
-// Resolve находит хост по имени или адресу (аллоулист). ok=false — хоста нет в
-// инвентаре (fail-closed: соединение устанавливать нельзя).
+// Resolve looks a host up by name or address (allowlist). ok=false means the host is absent
+// from the inventory (fail-closed: no connection may be made).
 func (inv *Inventory) Resolve(ref string) (Host, bool) {
 	if h, ok := inv.byName[ref]; ok {
 		return h, true

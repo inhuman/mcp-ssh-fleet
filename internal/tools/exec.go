@@ -16,8 +16,8 @@ type ExecInput struct {
 	Command string `json:"command" jsonschema:"a single non-interactive shell command to run on the host"`
 }
 
-// Exec — инструмент ssh_exec: одна произвольная команда на ОДНОМ инвентарном хосте.
-// Класс write-external; сервер выполняет команду — гейтинг доступа делает MCP-клиент.
+// Exec is the ssh_exec tool: one arbitrary command on ONE inventory host.
+// Class write-external; the server runs the command — access gating is the MCP client's job.
 type Exec struct {
 	inv *inventory.Inventory
 	ssh *sshx.Client

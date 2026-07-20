@@ -22,8 +22,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// e2e: реальный SSH-сервер в процессе (настоящий handshake x/crypto/ssh + исполнение
-// команды по проводу), НЕ мок. Проверяет sshx + tools целиком.
+// e2e: a real in-process SSH server (genuine x/crypto/ssh handshake plus command execution
+// over the wire), NOT a mock. Exercises sshx + tools end to end.
 
 func TestProbeExec_E2E(t *testing.T) {
 	portA := startSSHServer(t, shellExec)
@@ -46,7 +46,7 @@ hosts:
 	execTool := NewExec(inv, client, log)
 	ctx := t.Context()
 
-	// probe по тегу test → vm-a + vm-b, оба ok, реальный вывод uptime.
+	// probe by tag 'test' hits vm-a + vm-b, both ok, with real uptime output.
 	out, err := probe.Execute(ctx, ProbeInput{Tags: []string{"test"}, Check: "uptime"})
 	if err != nil {
 		t.Fatalf("probe: %v", err)
@@ -63,7 +63,7 @@ hosts:
 		}
 	}
 
-	// частичный сбой: тег stand-a → vm-a (ok) + vm-dead (порт 1, unreachable/timeout).
+	// partial failure: tag stand-a hits vm-a (ok) + vm-dead (port 1, unreachable/timeout).
 	out, err = probe.Execute(ctx, ProbeInput{Tags: []string{"stand-a"}, Check: "disk"})
 	if err != nil {
 		t.Fatalf("probe stand-a: %v", err)
@@ -79,18 +79,18 @@ hosts:
 		t.Fatalf("vm-dead should have failed, got %s", s)
 	}
 
-	// нет хостов под теги → честный пустой результат, не ошибка.
+	// no hosts match the tags: an honest empty result, not an error.
 	out, err = probe.Execute(ctx, ProbeInput{Tags: []string{"nope"}, Check: "mem"})
 	if err != nil || out.MatchedHosts != 0 {
 		t.Fatalf("no-match: err=%v matched=%d", err, out.MatchedHosts)
 	}
 
-	// пустые теги → отказ (не по всему флоту).
+	// empty tags are refused (never fan out across the whole fleet).
 	if _, err := probe.Execute(ctx, ProbeInput{Tags: nil, Check: "mem"}); err == nil {
 		t.Fatal("empty tags must be rejected")
 	}
 
-	// probe одного хоста по имени → одна секция, ok.
+	// probing a single host by name yields one section, ok.
 	single, err := probe.Execute(ctx, ProbeInput{Host: "vm-a", Check: "uptime"})
 	if err != nil {
 		t.Fatalf("probe host: %v", err)
@@ -98,20 +98,20 @@ hosts:
 	if single.MatchedHosts != 1 || len(single.Results) != 1 || single.Results[0].Host != "vm-a" || single.Results[0].Status != string(sshx.StatusOK) {
 		t.Fatalf("single-host probe bad result: %+v", single)
 	}
-	// probe одного хоста по адресу тоже резолвится.
+	// probing a single host by address resolves too.
 	if byAddr, err := probe.Execute(ctx, ProbeInput{Host: "127.0.0.1", Check: "uptime"}); err != nil || byAddr.MatchedHosts != 1 {
 		t.Fatalf("probe by addr: err=%v matched=%d", err, byAddr.MatchedHosts)
 	}
-	// probe хоста вне инвентаря → отказ (fail-closed).
+	// probing a host outside the inventory is refused (fail-closed).
 	if _, err := probe.Execute(ctx, ProbeInput{Host: "10.9.9.9", Check: "uptime"}); err == nil {
 		t.Fatal("probe host outside inventory must fail-closed")
 	}
-	// ни host, ни tags → ошибка.
+	// neither host nor tags is an error.
 	if _, err := probe.Execute(ctx, ProbeInput{Check: "uptime"}); err == nil {
 		t.Fatal("probe without host or tags must be rejected")
 	}
 
-	// exec произвольной команды на инвентарном хосте.
+	// exec of an arbitrary command on an inventory host.
 	er, err := execTool.Execute(ctx, ExecInput{Host: "vm-a", Command: "echo hello-fleet"})
 	if err != nil {
 		t.Fatalf("exec: %v", err)
@@ -120,12 +120,12 @@ hosts:
 		t.Fatalf("exec bad result: %+v", er)
 	}
 
-	// exec на хост вне инвентаря → отказ соединения (fail-closed).
+	// exec against a host outside the inventory refuses to connect (fail-closed).
 	if _, err := execTool.Execute(ctx, ExecInput{Host: "10.9.9.9", Command: "id"}); err == nil {
 		t.Fatal("host outside inventory must fail-closed")
 	}
 
-	// приватный ключ не течёт в вывод/reason.
+	// the private key never leaks into output or reason.
 	for _, r := range out.Results {
 		if containsKeyMaterial(r.Output) || containsKeyMaterial(r.Reason) {
 			t.Fatal("key material leaked into output")
@@ -140,7 +140,7 @@ func TestExec_Timeout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client := newClient(t, 1*time.Second) // короткий таймаут
+	client := newClient(t, 1*time.Second) // short timeout
 	er, err := NewExec(inv, client, zap.NewNop()).Execute(t.Context(), ExecInput{Host: "slow", Command: "sleep 3"})
 	if err != nil {
 		t.Fatalf("exec: %v", err)
@@ -154,7 +154,7 @@ func TestProbe_OutputCap(t *testing.T) {
 	port := startSSHServer(t, shellExec)
 	inv, _ := inventory.Parse([]byte(fmt.Sprintf(
 		"hosts:\n  - {name: big, addr: 127.0.0.1, user: tester, port: %d, tags: [t]}\n", port)))
-	// маленький кап
+	// small cap
 	client := newClientCap(t, 3*time.Second, 64)
 	out, err := NewProbe(inv, client, 4, 50, zap.NewNop()).
 		Execute(t.Context(), ProbeInput{Tags: []string{"t"}, Check: "uptime"})
@@ -173,7 +173,7 @@ func TestProbe_OutputCap(t *testing.T) {
 	}
 }
 
-// --- реальный in-process SSH-сервер (helper) ---
+// --- real in-process SSH server (helper) ---
 
 func startSSHServer(t *testing.T, run func(cmd string) (string, int)) int {
 	t.Helper()

@@ -16,7 +16,7 @@ func TestResolve_Known(t *testing.T) {
 			t.Fatalf("check %q has empty script", name)
 		}
 	}
-	// регистронезависимо
+	// case-insensitive
 	if _, err := Resolve("DISK"); err != nil {
 		t.Fatalf("case-insensitive resolve failed: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestNames_Sorted(t *testing.T) {
 func TestScripts_NonInteractive(t *testing.T) {
 	for _, name := range Names() {
 		c, _ := Resolve(name)
-		// курируемые проверки не должны требовать интерактивного ввода/эскалации
+		// curated checks must never need interactive input or privilege escalation
 		for _, bad := range []string{"sudo -S", "read ", "vi ", "vim ", "less ", "top\n"} {
 			if strings.Contains(c.Script, bad) {
 				t.Errorf("check %q script looks interactive/escalating: %q", name, c.Script)

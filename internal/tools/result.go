@@ -5,7 +5,7 @@ import (
 	"github.com/inhuman/mcp-ssh-fleet/internal/sshx"
 )
 
-// HostResult — секция ответа на один хост (общая для probe и exec).
+// HostResult is the per-host section of a response (shared by probe and exec).
 type HostResult struct {
 	Host        string `json:"host"`
 	Addr        string `json:"addr"`

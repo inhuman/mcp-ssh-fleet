@@ -2,6 +2,8 @@ module github.com/inhuman/mcp-ssh-fleet
 
 go 1.26.1
 
+toolchain go1.26.5
+
 require (
 	github.com/inhuman/config v0.0.2
 	github.com/modelcontextprotocol/go-sdk v1.6.1

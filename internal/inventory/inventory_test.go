@@ -37,7 +37,7 @@ func TestParse_DefaultsAndNormalize(t *testing.T) {
 	if a1.Port != 22 {
 		t.Fatalf("default port want 22, got %d", a1.Port)
 	}
-	// теги нормализованы в lower-case + отсортированы
+	// tags are normalized to lower-case and sorted
 	if got := a1.Tags; len(got) != 2 || got[0] != "stand-a" || got[1] != "test" {
 		t.Fatalf("tags normalize failed: %v", got)
 	}
@@ -74,20 +74,20 @@ func TestParse_EmptyInventoryOK(t *testing.T) {
 
 func TestMatch_AND(t *testing.T) {
 	inv := mustParse(t, sample)
-	// один тег test → vm-a1 и vm-b1
+	// a single tag 'test' matches vm-a1 and vm-b1
 	if got := inv.Match([]string{"test"}); len(got) != 2 {
 		t.Fatalf("tag test: want 2, got %d", len(got))
 	}
-	// AND: stand-a И test → только vm-a1
+	// AND: stand-a AND test matches vm-a1 only
 	got := inv.Match([]string{"stand-a", "test"})
 	if len(got) != 1 || got[0].Name != "vm-a1" {
 		t.Fatalf("AND stand-a+test: want [vm-a1], got %+v", got)
 	}
-	// запрос регистронезависим
+	// the query is case-insensitive
 	if got := inv.Match([]string{"STAND-A"}); len(got) != 2 {
 		t.Fatalf("case-insensitive stand-a: want 2, got %d", len(got))
 	}
-	// несуществующий тег → пусто
+	// an unknown tag matches nothing
 	if got := inv.Match([]string{"nope"}); len(got) != 0 {
 		t.Fatalf("unknown tag: want 0, got %d", len(got))
 	}

@@ -25,8 +25,8 @@ type ProbeOutput struct {
 	Results      []HostResult `json:"results"`
 }
 
-// Probe — инструмент ssh_probe: одна курируемая проверка на всех хостах, несущих
-// указанные теги (AND), с ограниченным параллелизмом. Класс read-only.
+// Probe is the ssh_probe tool: one curated check across every host carrying the given tags
+// (AND), with bounded concurrency. Class read-only.
 type Probe struct {
 	inv         *inventory.Inventory
 	ssh         *sshx.Client
@@ -102,7 +102,7 @@ func (p *Probe) Execute(ctx context.Context, in ProbeInput) (ProbeOutput, error)
 	}
 	wg.Wait()
 
-	// Данные хостов не логируем — только метаданные.
+	// Host data is never logged — metadata only.
 	p.log.Info("ssh_probe completed", zap.String("check", chk.Name), zap.Int("matched_hosts", len(hosts)))
 	return ProbeOutput{Check: chk.Name, MatchedHosts: len(hosts), Results: results}, nil
 }
