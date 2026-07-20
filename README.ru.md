@@ -2,6 +2,12 @@
 
 [English](README.md) | **Русский**
 
+[![Version](https://img.shields.io/github/v/tag/inhuman/mcp-ssh-fleet?sort=semver&style=flat-square&label=version)](https://github.com/inhuman/mcp-ssh-fleet/tags)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.inhuman%2Fmcp--ssh--fleet-blue?style=flat-square)](https://registry.modelcontextprotocol.io)
+[![Container](https://img.shields.io/badge/ghcr.io-inhuman%2Fmcp--ssh--fleet-2496ED?style=flat-square&logo=github)](https://github.com/inhuman/mcp-ssh-fleet/pkgs/container/mcp-ssh-fleet)
+[![Build](https://img.shields.io/github/actions/workflow/status/inhuman/mcp-ssh-fleet/docker-publish.yml?style=flat-square&logo=github)](https://github.com/inhuman/mcp-ssh-fleet/actions/workflows/docker-publish.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+
 MCP-сервер: даёт агенту два инструмента поверх SSH к флоту виртуалок вне Kubernetes.
 Ключ доступа — секрет пода (вне контекста модели); инвентарь — аллоулист (fail-closed).
 

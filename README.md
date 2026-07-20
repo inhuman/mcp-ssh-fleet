@@ -2,6 +2,16 @@
 
 **English** | [Русский](README.ru.md)
 
+[![Version](https://img.shields.io/github/v/tag/inhuman/mcp-ssh-fleet?sort=semver&style=flat-square&label=version)](https://github.com/inhuman/mcp-ssh-fleet/tags)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-io.github.inhuman%2Fmcp--ssh--fleet-blue?style=flat-square)](https://registry.modelcontextprotocol.io)
+[![Container](https://img.shields.io/badge/ghcr.io-inhuman%2Fmcp--ssh--fleet-2496ED?style=flat-square&logo=github)](https://github.com/inhuman/mcp-ssh-fleet/pkgs/container/mcp-ssh-fleet)
+[![Build](https://img.shields.io/github/actions/workflow/status/inhuman/mcp-ssh-fleet/docker-publish.yml?style=flat-square&logo=github)](https://github.com/inhuman/mcp-ssh-fleet/actions/workflows/docker-publish.yml)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/inhuman/mcp-ssh-fleet?style=flat-square&logo=go)](https://go.dev/)
+[![Go Report Card](https://goreportcard.com/badge/github.com/inhuman/mcp-ssh-fleet?style=flat-square)](https://goreportcard.com/report/github.com/inhuman/mcp-ssh-fleet)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
+[![Issues](https://img.shields.io/github/issues/inhuman/mcp-ssh-fleet?style=flat-square)](https://github.com/inhuman/mcp-ssh-fleet/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/inhuman/mcp-ssh-fleet?style=flat-square)](https://github.com/inhuman/mcp-ssh-fleet/commits/main)
+
 MCP server that gives an agent two tools over SSH to a fleet of hosts outside
 Kubernetes. The SSH key is a mounted secret (never enters model context); the
 inventory is a fail-closed allowlist.
