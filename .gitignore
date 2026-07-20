@@ -46,3 +46,6 @@ CLAUDE.md
 AGENTS.md
 GEMINI.md
 PLAN.md
+
+# Local-only git hooks (contain a specific private e-mail address)
+.githooks/
